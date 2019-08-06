@@ -44,6 +44,7 @@ app.get("/urls", (req, res) => {
     username: req.cookies["username"],
     urls: urlDatabase
   };
+
   res.render("urls_index", templateVars);
 });
 
@@ -94,6 +95,12 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
+  res.redirect("/urls/");
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  //res.cookie("username", "null")
   res.redirect("/urls/");
 });
 
