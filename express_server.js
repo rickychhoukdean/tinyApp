@@ -11,7 +11,7 @@ let generateRandomString = function() {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   if (!urlDatabase[result]) {
@@ -47,17 +47,28 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`); // Respond with 'Ok' (we will replace this)
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+app.post("/urls/:shortURL/Submit", (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.newURL;
+
+  res.redirect("/urls");
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
+
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect(`/urls/`);
+});
+
+app.post("/urls/:url/", (req, res) => {
+  let shortURL = req.params.url;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
