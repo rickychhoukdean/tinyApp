@@ -29,6 +29,13 @@
             </label>
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
+
+
+
+          <form action="/register" method="GET">
+            <div class="username"><%=username%></div>
+            <button type="submit" class="btn btn-primary">Register</button>
+          </form>
       <% } else{ %>
         <form class="form-inline" action="/logout" method="POST">
           <div class="username"><%=username%></div>
