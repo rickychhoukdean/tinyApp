@@ -16,7 +16,7 @@ let generateRandomString = function() {
   for (let i = 0; i < 6; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
-  if (!urlDatabase[result]) {
+  if (!urlDatabase[result] && !users[result]) {
     return result;
   } else {
     generateRandomString();
@@ -28,7 +28,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {};
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -100,6 +111,17 @@ app.get("/register", (req, res) => {
     username: req.cookies["username"]
   };
   res.render("urls_register", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  let randomID = generateRandomString();
+  users[randomID] = {
+    id: randomID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  console.log(users);
+  res.redirect("/urls");
 });
 
 app.post("/login", (req, res) => {
