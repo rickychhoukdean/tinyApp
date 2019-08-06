@@ -16,6 +16,25 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <form method="POST" action="/login">
+          <% if(!username){ %>
+          <label for="username">
+            <input
+              type="text"
+              class="form-control"
+              id="inlineFormInputName"
+              placeholder="Username"
+              name="username"
+            />
+          </label>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+        <% } else{ %>
+
+        <div class="username"><%=username%></div>
+
+        <% }%>
       </div>
     </div>
   </nav>
