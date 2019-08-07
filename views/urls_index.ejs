@@ -20,6 +20,8 @@
   </head>
   <body>
     <main style="margin: 1em;">
+      <% if(user){ %>
+
       <h3>My URLs</h3>
       <table class="table">
         <thead>
@@ -53,7 +55,13 @@
           <% } %>
         </tbody>
       </table>
+      <% } else { %>
+Please log-in or register :)
+
+<% } %>
+
     </main>
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
