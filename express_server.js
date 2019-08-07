@@ -6,10 +6,7 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-const bcrypt = require('bcrypt');
-const password = "purple-monkey-dinosaur"; // found in the req.params object
-const hashedPassword = bcrypt.hashSync(password, 10);
-
+const bcrypt = require("bcrypt");
 //Random alphanumeric generator for urlDatabase and users
 let generateRandomString = function() {
   let result = "";
@@ -64,6 +61,12 @@ const urlsForUser = function(id) {
     }
   }
   return result;
+};
+
+const userIDfromEmail = function(email) {
+  for (let user in users) {
+    if (email === users[user].email) return user;
+  }
 };
 
 app.get("/", (req, res) => {
@@ -169,6 +172,9 @@ app.get("/login", (req, res) => {
 
 //Regist route
 app.post("/register", (req, res) => {
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   if (
     !req.body.email ||
     !req.body.password ||
@@ -181,7 +187,7 @@ app.post("/register", (req, res) => {
     users[randomID] = {
       id: randomID,
       email: req.body.email,
-      password: req.body.password
+      password: hashedPassword
     };
     res.cookie("user_id", randomID);
     res.redirect("/urls");
@@ -190,15 +196,15 @@ app.post("/register", (req, res) => {
 
 //Login route
 app.post("/login", (req, res) => {
+  let desiredID = userIDfromEmail(req.body["email"]);
   if (!getUser(users, req.body["email"], "email")) {
     res.status(403).send("Error 403, email does not exist");
-  } else if (!getUser(users, req.body["password"], "password")) {
+  } else if (
+    !bcrypt.compareSync(req.body["password"], users[desiredID]["password"])
+  ) {
     res.status(403).send("Error 403, wrong password entered");
   } else {
-    res.cookie(
-      "user_id",
-      getUser(users, req.body["password"], "password")["id"]
-    );
+    res.cookie("user_id", desiredID);
 
     res.redirect("/urls");
   }
