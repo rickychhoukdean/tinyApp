@@ -1,3 +1,5 @@
+
+const userIDfromEmail = require("./helpers");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
@@ -58,11 +60,6 @@ const urlsForUser = function(id) {
   return result;
 };
 //Pulls the correct ID from an object of objects given an email and an object
-const userIDfromEmail = function(email, database) {
-  for (let user in database) {
-    if (email === database[user].email) return user;
-  }
-};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
