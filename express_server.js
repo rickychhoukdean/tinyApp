@@ -28,7 +28,9 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {};
+const users = {
+  testID: { id: "test", email: "test@test.com", password: "test" }
+};
 
 //Function to check if email exists in the users object, return false if it doesn't else return true
 const emailChecker = function(users, checkEmail) {
@@ -40,9 +42,9 @@ const emailChecker = function(users, checkEmail) {
   return result;
 };
 
-const getUser = function(users, userID) {
+const getUser = function(users, parameterCheck, parameter) {
   for (let user in users) {
-    if (users[user].id === userID) return users[user];
+    if (users[user][parameter] === parameterCheck) return users[user];
   }
   return null;
 };
@@ -53,14 +55,14 @@ app.get("/", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"])
+    user: getUser(users, req.cookies["user_id"], "id")
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"]),
+    user: getUser(users, req.cookies["user_id"], "id"),
     urls: urlDatabase
   };
   console.log(getUser(users, req.cookies["user_id"]), "hi");
@@ -100,7 +102,7 @@ app.post("/urls/:url/", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"]),
+    user: getUser(users, req.cookies["user_id"], "id"),
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };
@@ -114,29 +116,15 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"])
+    user: getUser(users, req.cookies["user_id"], "id")
   };
   res.render("urls_register", templateVars);
 });
 
 app.get("/login", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"])
+    user: getUser(users, req.cookies["user_id"], "id")
   };
-
-  if (!getUser(users, req.body["user_id"])) {
-    // return console.log("email does not exist");
-    res.status(400);
-    res.send("None shall pass");
-  } else if (
-    getUser(users, req.body["user_id"].password !== req.body["password"])
-  ) {
-    // return console.log("password does not match");
-    res.status(400);
-    res.send("None shall pass");
-  } else {
-    res.redirect("/urls");
-  }
 
   res.render("urls_login", templateVars);
 });
@@ -163,8 +151,18 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  // res.cookie("username", req.body.username);
-  res.redirect("/urls/");
+  if (!getUser(users, req.body["email"], "email")) {
+    console.log("email does not exist");
+    res.status(403);
+    res.send("None shall pass");
+  } else if (!getUser(users, req.body["password"], "password")) {
+    console.log("wrong password");
+    res.status(403);
+    res.send("None shall pass");
+  } else {
+    console.log("password match");
+    res.redirect("/urls");
+  }
 });
 
 app.post("/logout", (req, res) => {
