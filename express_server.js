@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
@@ -7,6 +8,17 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 const bcrypt = require("bcrypt");
+
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["asdsdasdsadas"],
+
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  })
+);
+
 //Random alphanumeric generator for urlDatabase and users
 let generateRandomString = function() {
   let result = "";
@@ -76,7 +88,7 @@ app.get("/", (req, res) => {
 //Directs you to the create a new URL page, if not logged in direct you to the register page
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"], "id")
+    user: getUser(users, req.session["user_id"], "id")
   };
 
   if (templateVars.user) {
@@ -87,11 +99,11 @@ app.get("/urls/new", (req, res) => {
 //Shows you the URLs for your account only
 app.get("/urls", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"], "id"),
-    urls: urlsForUser(req.cookies["user_id"])
+    user: getUser(users, req.session["user_id"], "id"),
+    urls: urlsForUser(req.session["user_id"])
   };
 
-  getUser(users, req.cookies["user_id"]);
+  getUser(users, req.session["user_id"]);
   res.render("urls_index", templateVars);
 });
 
@@ -101,7 +113,7 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    userID: req.cookies["user_id"]
+    userID: req.session["user_id"]
   };
 
   res.redirect(`/urls/${shortURL}`);
@@ -119,7 +131,7 @@ app.get("/urls.json", (req, res) => {
 
 //Deletes the clicked URL if the correct user is logged in
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL].userID) {
+  if (req.session["user_id"] === urlDatabase[req.params.shortURL].userID) {
     delete urlDatabase[req.params.shortURL].userID;
     res.redirect(`/urls/`);
   } else {
@@ -131,7 +143,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:url/", (req, res) => {
   let shortURL = req.params.url;
 
-  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL].userID) {
+  if (req.session["user_id"] === urlDatabase[req.params.shortURL].userID) {
     res.redirect(`/urls/${shortURL}`);
   } else {
     console.log("fail");
@@ -141,7 +153,7 @@ app.post("/urls/:url/", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"], "id"),
+    user: getUser(users, req.session["user_id"], "id"),
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]["longURL"]
   };
@@ -156,7 +168,7 @@ app.get("/u/:shortURL", (req, res) => {
 //Register Page
 app.get("/register", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"], "id")
+    user: getUser(users, req.session["user_id"], "id")
   };
   res.render("urls_register", templateVars);
 });
@@ -164,7 +176,7 @@ app.get("/register", (req, res) => {
 //Login Page
 app.get("/login", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.cookies["user_id"], "id")
+    user: getUser(users, req.session["user_id"], "id")
   };
 
   res.render("urls_login", templateVars);
@@ -189,7 +201,7 @@ app.post("/register", (req, res) => {
       email: req.body.email,
       password: hashedPassword
     };
-    res.cookie("user_id", randomID);
+    req.session["user_id"] = randomID;
     res.redirect("/urls");
   }
 });
@@ -204,14 +216,14 @@ app.post("/login", (req, res) => {
   ) {
     res.status(403).send("Error 403, wrong password entered");
   } else {
-    res.cookie("user_id", desiredID);
+    req.session("user_id", desiredID);
 
     res.redirect("/urls");
   }
 });
 //Logout route
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls/");
 });
 
