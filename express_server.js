@@ -152,15 +152,19 @@ app.post("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
   if (!getUser(users, req.body["email"], "email")) {
-    console.log("email does not exist");
-    res.status(403);
-    res.send("None shall pass");
+
+    res.status(403).send("Error 403, email does not exist");
   } else if (!getUser(users, req.body["password"], "password")) {
     console.log("wrong password");
-    res.status(403);
-    res.send("None shall pass");
+    res.status(403).send("Error 403, wrong password entered");
   } else {
     console.log("password match");
+
+    res.cookie(
+      "user_id",
+      getUser(users, req.body["password"], "password")["id"]
+    );
+
     res.redirect("/urls");
   }
 });
