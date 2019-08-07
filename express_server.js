@@ -57,7 +57,10 @@ app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: getUser(users, req.cookies["user_id"], "id")
   };
-  res.render("urls_new", templateVars);
+
+  if (templateVars.user) {
+    res.render("urls_new", templateVars);
+  } else res.redirect("/register");
 });
 
 app.get("/urls", (req, res) => {
@@ -65,7 +68,6 @@ app.get("/urls", (req, res) => {
     user: getUser(users, req.cookies["user_id"], "id"),
     urls: urlDatabase
   };
-  console.log(getUser(users, req.cookies["user_id"]), "hi");
   getUser(users, req.cookies["user_id"]);
   res.render("urls_index", templateVars);
 });
@@ -144,7 +146,6 @@ app.post("/register", (req, res) => {
       email: req.body.email,
       password: req.body.password
     };
-    console.log(users);
     res.cookie("user_id", randomID);
     res.redirect("/urls");
   }
@@ -152,14 +153,10 @@ app.post("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
   if (!getUser(users, req.body["email"], "email")) {
-
     res.status(403).send("Error 403, email does not exist");
   } else if (!getUser(users, req.body["password"], "password")) {
-    console.log("wrong password");
     res.status(403).send("Error 403, wrong password entered");
   } else {
-    console.log("password match");
-
     res.cookie(
       "user_id",
       getUser(users, req.body["password"], "password")["id"]
