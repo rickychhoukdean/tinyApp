@@ -46,23 +46,6 @@ const users = {
   testID: { id: "test", email: "test@test.com", password: "test" }
 };
 
-//Function to check if email exists in the users object, return false if it doesn't else return true
-const emailChecker = function(users, checkEmail) {
-  let result = false;
-  for (let user in users) {
-    users[user].email === checkEmail ? (result = true) : null;
-  }
-  return result;
-};
-
-//Function to check if a given value in an object is equivalent to the object inside the user
-const getUser = function(users, parameterCheck, parameter) {
-  for (let user in users) {
-    if (users[user][parameter] === parameterCheck) return users[user];
-  }
-  return null;
-};
-
 //Get the urls for the specific user inputted
 const urlsForUser = function(id) {
   let result = {};
@@ -88,8 +71,11 @@ app.get("/", (req, res) => {
 //Directs you to the create a new URL page, if not logged in direct you to the register page
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.session["user_id"], "id")
+    user: req.session["user_id"],
+    user2: userIDfromEmail(req.session)
   };
+
+  console.log(req.body);
 
   if (templateVars.user) {
     res.render("urls_new", templateVars);
@@ -99,11 +85,10 @@ app.get("/urls/new", (req, res) => {
 //Shows you the URLs for your account only
 app.get("/urls", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.session["user_id"], "id"),
+    user: req.session["user_id"],
     urls: urlsForUser(req.session["user_id"])
   };
 
-  getUser(users, req.session["user_id"]);
   res.render("urls_index", templateVars);
 });
 
@@ -153,7 +138,7 @@ app.post("/urls/:url/", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.session["user_id"], "id"),
+    user: req.session["user_id"],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]["longURL"]
   };
@@ -168,7 +153,7 @@ app.get("/u/:shortURL", (req, res) => {
 //Register Page
 app.get("/register", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.session["user_id"], "id")
+    user: req.session["user_id"]
   };
   res.render("urls_register", templateVars);
 });
@@ -176,7 +161,7 @@ app.get("/register", (req, res) => {
 //Login Page
 app.get("/login", (req, res) => {
   let templateVars = {
-    user: getUser(users, req.session["user_id"], "id")
+    user: req.session["user_id"]
   };
 
   res.render("urls_login", templateVars);
@@ -190,7 +175,7 @@ app.post("/register", (req, res) => {
   if (
     !req.body.email ||
     !req.body.password ||
-    emailChecker(users, req.body.email)
+    userIDfromEmail(req.body.email)
   ) {
     res.status(400);
     res.send("None shall pass");
@@ -209,15 +194,15 @@ app.post("/register", (req, res) => {
 //Login route
 app.post("/login", (req, res) => {
   let desiredID = userIDfromEmail(req.body["email"]);
-  if (!getUser(users, req.body["email"], "email")) {
+
+  if (!userIDfromEmail(req.body.email)) {
     res.status(403).send("Error 403, email does not exist");
   } else if (
     !bcrypt.compareSync(req.body["password"], users[desiredID]["password"])
   ) {
     res.status(403).send("Error 403, wrong password entered");
   } else {
-    req.session("user_id", desiredID);
-
+    req.session["user_id"] = desiredID;
     res.redirect("/urls");
   }
 });
