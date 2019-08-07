@@ -16,16 +16,17 @@ let generateRandomString = function() {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   if (!urlDatabase[result] && !users[result]) {
-    //If the randomly generated string already exists then run again
     return result;
   } else {
-    generateRandomString();
+    generateRandomString(); //If the randomly generated string already exists then run again
   }
 };
 
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
+  test1: { longURL: "https://www.googlea.ca", userID: "test" },
+  test2: { longURL: "https://www.googles.ca", userID: "test" }
 };
 
 const users = {
@@ -35,18 +36,29 @@ const users = {
 //Function to check if email exists in the users object, return false if it doesn't else return true
 const emailChecker = function(users, checkEmail) {
   let result = false;
-
   for (let user in users) {
     users[user].email === checkEmail ? (result = true) : null;
   }
   return result;
 };
 
+//Function to check if a given value in an object is equivalent to the object inside the user
 const getUser = function(users, parameterCheck, parameter) {
   for (let user in users) {
     if (users[user][parameter] === parameterCheck) return users[user];
   }
   return null;
+};
+
+const urlsForUser = function(id) {
+  let result = {};
+
+  for (let url in urlDatabase) {
+    if (id === urlDatabase[url].userID) {
+      result[url] = urlDatabase[url];
+    }
+  }
+  return result;
 };
 
 app.get("/", (req, res) => {
@@ -66,10 +78,9 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     user: getUser(users, req.cookies["user_id"], "id"),
-    urls: urlDatabase
+    urls: urlsForUser(req.cookies["user_id"])
   };
 
-  console.log(templateVars);
   getUser(users, req.cookies["user_id"]);
   res.render("urls_index", templateVars);
 });
