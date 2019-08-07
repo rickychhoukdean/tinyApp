@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+//Random alphanumeric generator for urlDatabase and users
 let generateRandomString = function() {
   let result = "";
   const characters =
@@ -50,6 +51,7 @@ const getUser = function(users, parameterCheck, parameter) {
   return null;
 };
 
+//Get the urls for the specific user inputted
 const urlsForUser = function(id) {
   let result = {};
 
@@ -65,6 +67,7 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+//Directs you to the create a new URL page, if not logged in direct you to the register page
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: getUser(users, req.cookies["user_id"], "id")
@@ -75,6 +78,7 @@ app.get("/urls/new", (req, res) => {
   } else res.redirect("/register");
 });
 
+//Shows you the URLs for your account only
 app.get("/urls", (req, res) => {
   let templateVars = {
     user: getUser(users, req.cookies["user_id"], "id"),
@@ -85,53 +89,65 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//Creates a new shortURL
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    id: req.cookies["user_id"]
+    userID: req.cookies["user_id"]
   };
-  res.redirect(`/urls/${shortURL}`); // Respond with 'Ok' (we will replace this)
+
+  res.redirect(`/urls/${shortURL}`);
 });
 
-app.post("/urls/:shortURL/Submit", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.newURL;
-  res.redirect("/urls");
-});
+// app.post("/urls/:shortURL/Submit", (req, res) => {
+//   urlDatabase[req.params.shortURL] = req.body.newURL;
+//   res.redirect("/urls");
+// }); I think this is useless
 
+//Returns the json file of the page
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
+//Deletes the clicked URL if the correct user is logged in
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls/`);
+  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL].userID) {
+    delete urlDatabase[req.params.shortURL].userID;
+    res.redirect(`/urls/`);
+  } else {
+    console.log("fail");
+    res.send("fail");
+  }
 });
 
 app.post("/urls/:url/", (req, res) => {
   let shortURL = req.params.url;
-  res.redirect(`/urls/${shortURL}`);
+
+  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL].userID) {
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    console.log("fail");
+    res.send("fail");
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     user: getUser(users, req.cookies["user_id"], "id"),
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL]["longURL"]
   };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL]["longURL"];
   res.redirect(longURL);
 });
 
+//Register Page
 app.get("/register", (req, res) => {
   let templateVars = {
     user: getUser(users, req.cookies["user_id"], "id")
@@ -139,6 +155,7 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+//Login Page
 app.get("/login", (req, res) => {
   let templateVars = {
     user: getUser(users, req.cookies["user_id"], "id")
@@ -147,6 +164,7 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
+//Regist route
 app.post("/register", (req, res) => {
   if (
     !req.body.email ||
@@ -167,6 +185,7 @@ app.post("/register", (req, res) => {
   }
 });
 
+//Login route
 app.post("/login", (req, res) => {
   if (!getUser(users, req.body["email"], "email")) {
     res.status(403).send("Error 403, email does not exist");
@@ -181,7 +200,7 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   }
 });
-
+//Logout route
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls/");
