@@ -16,32 +16,35 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <% if(!username){ %>
-          <form method="POST" action="/login">
-            <label for="username">
-              <input
-                type="text"
-                class="form-control"
-                id="inlineFormInputName"
-                placeholder="Username"
-                name="username"
-              />
-            </label>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
+        <% if(!user){ %>
+        <form method="POST" action="/login">
+          <label for="username">
+            <input
+              type="text"
+              class="form-control"
+              id="inlineFormInputName"
+              placeholder="Username"
+              name="username"
+            />
+          </label>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
 
+        <form action="/register" method="GET">
+          <div class="username"><%=user%></div>
+          <button type="submit" class="btn btn-primary">Register</button>
+        </form>
 
-
-          <form action="/register" method="GET">
-            <div class="username"><%=username%></div>
-            <button type="submit" class="btn btn-primary">Register</button>
-          </form>
-      <% } else{ %>
+        <form action="/login" method="GET">
+          <div class="username"><%=user%></div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <% } else{ %>
         <form class="form-inline" action="/logout" method="POST">
-          <div class="username"><%=username%></div>
+          <div class="username"><%=user.email%></div>
           <button type="submit" class="btn btn-primary">Log Out</button>
         </form>
-      <% }%>
+        <% }%>
       </div>
     </div>
   </nav>
