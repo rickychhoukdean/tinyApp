@@ -57,10 +57,10 @@ const urlsForUser = function(id) {
   }
   return result;
 };
-
-const userIDfromEmail = function(email) {
-  for (let user in users) {
-    if (email === users[user].email) return user;
+//Pulls the correct ID from an object of objects given an email and an object
+const userIDfromEmail = function(email, database) {
+  for (let user in database) {
+    if (email === database[user].email) return user;
   }
 };
 
@@ -72,7 +72,7 @@ app.get("/", (req, res) => {
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: req.session["user_id"],
-    user2: userIDfromEmail(req.session)
+    user2: userIDfromEmail(req.session, users)
   };
 
   console.log(req.body);
@@ -175,7 +175,7 @@ app.post("/register", (req, res) => {
   if (
     !req.body.email ||
     !req.body.password ||
-    userIDfromEmail(req.body.email)
+    userIDfromEmail(req.body.email, users)
   ) {
     res.status(400);
     res.send("None shall pass");
@@ -193,9 +193,9 @@ app.post("/register", (req, res) => {
 
 //Login route
 app.post("/login", (req, res) => {
-  let desiredID = userIDfromEmail(req.body["email"]);
+  let desiredID = userIDfromEmail(req.body["email"], users);
 
-  if (!userIDfromEmail(req.body.email)) {
+  if (!userIDfromEmail(req.body.email), users) {
     res.status(403).send("Error 403, email does not exist");
   } else if (
     !bcrypt.compareSync(req.body["password"], users[desiredID]["password"])
