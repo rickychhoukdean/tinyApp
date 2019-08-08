@@ -1,20 +1,17 @@
-
-const userIDfromEmail = require("./helpers");
+const { userIDfromEmail } = require("./helpers");
 const express = require("express");
-const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
 const bcrypt = require("bcrypt");
 
 app.use(
   cookieSession({
     name: "session",
-    keys: ["asdsdasdsadas"],
+    keys: ["asdsdasdsadas"], //Random keys
 
     // Cookie Options
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -62,17 +59,20 @@ const urlsForUser = function(id) {
 //Pulls the correct ID from an object of objects given an email and an object
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  let templateVars = {
+    user: req.session["user_id"]
+  };
+
+  if (templateVars.user) {
+    res.render("urls_new", templateVars);
+  } else res.redirect("/register");
 });
 
 //Directs you to the create a new URL page, if not logged in direct you to the register page
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: req.session["user_id"],
-    user2: userIDfromEmail(req.session, users)
+    user: req.session["user_id"]
   };
-
-  console.log(req.body);
 
   if (templateVars.user) {
     res.render("urls_new", templateVars);
@@ -92,7 +92,9 @@ app.get("/urls", (req, res) => {
 //Creates a new shortURL
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
+
   let shortURL = generateRandomString();
+
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.session["user_id"]
@@ -191,8 +193,8 @@ app.post("/register", (req, res) => {
 //Login route
 app.post("/login", (req, res) => {
   let desiredID = userIDfromEmail(req.body["email"], users);
-
-  if (!userIDfromEmail(req.body.email), users) {
+  console.log(userIDfromEmail);
+  if (!(userIDfromEmail(req.body["email"]), users)) {
     res.status(403).send("Error 403, email does not exist");
   } else if (
     !bcrypt.compareSync(req.body["password"], users[desiredID]["password"])
