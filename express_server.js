@@ -25,39 +25,39 @@ app.use(
 
 const urlDatabase = {
   //Dummy Data
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-    urlDate: "test",
-    clicks: 0
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-    urlDate: "test",
-    clicks: 0
-  },
-  test1: {
-    longURL: "https://www.googlea.ca",
-    userID: "test",
-    urlDate: "test",
-    clicks: 0
-  },
-  test2: {
-    longURL: "https://www.googles.ca",
-    userID: "test",
-    urlDate: "test",
-    clicks: 0
-  }
+  // b6UTxQ: {
+  //   longURL: "https://www.tsn.ca",
+  //   userID: "aJ48lW",
+  //   urlDate: "test",
+  //   clicks: 0
+  // },
+  // i3BoGr: {
+  //   longURL: "https://www.google.ca",
+  //   userID: "aJ48lW",
+  //   urlDate: "test",
+  //   clicks: 0
+  // },
+  // test1: {
+  //   longURL: "https://www.googlea.ca",
+  //   userID: "test",
+  //   urlDate: "test",
+  //   clicks: 0
+  // },
+  // test2: {
+  //   longURL: "https://www.googles.ca",
+  //   userID: "test",
+  //   urlDate: "test",
+  //   clicks: 0
+  // }
 };
 
 const users = {
   //Dummy Data
-  testID: {
-    id: "test",
-    email: "test@test.com",
-    password: bcrypt.hashSync("test", 10)
-  }
+  // testID: {
+  //   id: "test",
+  //   email: "test@test.com",
+  //   password: bcrypt.hashSync("test", 10)
+  // }
 };
 
 //Root page that will direct the user to the login page if not logged in or the urls page if logged in.
