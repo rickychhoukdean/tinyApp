@@ -35,14 +35,30 @@ let generateRandomString = function() {
 };
 
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW", urlDate: "test" },
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+    urlDate: "test",
+    clicks: 0
+  },
   i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
-    urlDate: "test"
+    urlDate: "test",
+    clicks: 0
   },
-  test1: { longURL: "https://www.googlea.ca", userID: "test", urlDate: "test" },
-  test2: { longURL: "https://www.googles.ca", userID: "test", urlDate: "test" }
+  test1: {
+    longURL: "https://www.googlea.ca",
+    userID: "test",
+    urlDate: "test",
+    clicks: 0
+  },
+  test2: {
+    longURL: "https://www.googles.ca",
+    userID: "test",
+    urlDate: "test",
+    clicks: 0
+  }
 };
 
 const users = {
@@ -105,7 +121,8 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.session["user_id"],
-    urlDate: Date(Date.now()).toString()
+    urlDate: Date(Date.now()).toString(),
+    clicks: 0
   };
 
   res.redirect(`/urls/${shortURL}`);
@@ -157,6 +174,9 @@ app.get("/urls/:shortURL", (req, res) => {
 //Redirect link to the page of the URL that has been shortened
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]["longURL"];
+
+  urlDatabase[req.params.shortURL]["clicks"] += 1;
+
   res.redirect(longURL);
 });
 
@@ -179,7 +199,7 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
-//Regist route
+//Register route
 app.post("/register", (req, res) => {
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
