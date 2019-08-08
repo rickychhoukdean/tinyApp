@@ -11,6 +11,7 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 const bcrypt = require("bcrypt");
+const methodOverride = require("method-override");
 
 app.use(
   cookieSession({
