@@ -15,15 +15,16 @@ const methodOverride = require("method-override");
 
 app.use(
   cookieSession({
+    //Cookie hasher
     name: "session",
     keys: ["asdsdasdsadas"], //Random keys
-
     // Cookie Options
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   })
 );
 
 const urlDatabase = {
+  //Dummy Data
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
     userID: "aJ48lW",
@@ -51,6 +52,7 @@ const urlDatabase = {
 };
 
 const users = {
+  //Dummy Data
   testID: {
     id: "test",
     email: "test@test.com",
@@ -58,11 +60,11 @@ const users = {
   }
 };
 
+//Root page that will direct the user to the login page if not logged in or the urls page if logged in.
 app.get("/", (req, res) => {
   let templateVars = {
     user: users[req.session["user_id"]]
   };
-
   if (templateVars.user) {
     res.render("urls_new", templateVars);
   } else res.redirect("/login");
@@ -94,8 +96,8 @@ app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
 
   let shortURL = generateRandomString(urlDatabase);
-
-  urlDatabase[shortURL] = {
+//Adds a shortURL to the urlDatabase
+  urlDatabase[shortURL] = { 
     longURL: req.body.longURL,
     userID: req.session["user_id"],
     urlDate: Date(Date.now()).toString(),
@@ -105,6 +107,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+//Edits the selected post to the desired choice
 app.post("/urls/:shortURL/Submit", (req, res) => {
   urlDatabase[req.params.shortURL]["longURL"] = req.body.newURL;
   res.redirect("/urls");
@@ -122,19 +125,17 @@ app.delete("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[req.params.shortURL].userID;
     res.redirect(`/urls/`);
   } else {
-   
     res.status(401).send("You can not delete somebody elses URL.");
   }
 });
 
-app.use(methodOverride("_method"));
 //Post request to edit the URL
+app.use(methodOverride("_method"));
 app.put("/urls/:url/", (req, res) => {
   let shortURL = req.params.url;
   if (req.session["user_id"] === urlDatabase[req.params.url].userID) {
     res.redirect(`/urls/${shortURL}`);
   } else {
-  
     res.status(400).send("This is not your URL to edit.");
   }
 });
@@ -200,7 +201,6 @@ app.post("/register", (req, res) => {
     res.status(404).send("Please enter a password");
   } else if (userIDfromEmail(req.body.email, users)) {
     res.status(401).send("This email already exists.");
-
   } else {
     let randomID = generateRandomString(users);
     users[randomID] = {
