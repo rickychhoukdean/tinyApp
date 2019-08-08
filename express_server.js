@@ -118,13 +118,12 @@ app.get("/urls.json", (req, res) => {
 //Deletes the clicked URL if the correct user is logged in
 app.use(methodOverride("_method"));
 app.delete("/urls/:shortURL/delete", (req, res) => {
-  console.log(req.params);
   if (req.session["user_id"] === urlDatabase[req.params.shortURL].userID) {
     delete urlDatabase[req.params.shortURL].userID;
     res.redirect(`/urls/`);
   } else {
-    console.log("fail");
-    res.send("fail");
+   
+    res.status(401).send("You can not delete somebody elses URL.");
   }
 });
 
@@ -135,21 +134,21 @@ app.put("/urls/:url/", (req, res) => {
   if (req.session["user_id"] === urlDatabase[req.params.url].userID) {
     res.redirect(`/urls/${shortURL}`);
   } else {
-    console.log("fail");
-    res.send("fail");
+  
+    res.status(400).send("This is not your URL to edit.");
   }
 });
 
 //Page after the user creates a short URL showing them the new shortURL and the edit button
 app.get("/urls/:shortURL", (req, res) => {
   if (!req.session["user_id"]) {
-    res.send("You must be logged in to edit a URL!");
+    res.status(400).send("You must be logged in to edit a URL!");
   } else if (!urlDatabase[req.params["shortURL"]]) {
-    res.send("Url requested does not exist!");
+    res.status(400).send("Url requested does not exist!");
   } else if (
     urlDatabase[req.params["shortURL"]]["userID"] !== req.session["user_id"]
   ) {
-    res.send("You cannot edit someone elses URL!");
+    res.status(400).send("You cannot edit someone elses URL!");
   } else {
     let templateVars = {
       user: users[req.session["user_id"]],
@@ -163,7 +162,7 @@ app.get("/urls/:shortURL", (req, res) => {
 //Redirect link to the page of the URL that has been shortened
 app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.send("Site DNE");
+    res.status(404).send("The site does not exist");
   } else {
     const longURL = urlDatabase[req.params.shortURL]["longURL"];
 
@@ -195,13 +194,13 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  if (
-    !req.body.email ||
-    !req.body.password ||
-    userIDfromEmail(req.body.email, users)
-  ) {
-    res.status(400);
-    res.send("None shall pass");
+  if (!req.body.email) {
+    res.status(404).send("Please enter an email");
+  } else if (!req.body.password) {
+    res.status(404).send("Please enter a password");
+  } else if (userIDfromEmail(req.body.email, users)) {
+    res.status(401).send("This email already exists.");
+
   } else {
     let randomID = generateRandomString(users);
     users[randomID] = {
