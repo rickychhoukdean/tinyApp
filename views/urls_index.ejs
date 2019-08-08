@@ -28,10 +28,10 @@
           <tr>
             <th scope="col">Short URL</th>
             <th scope="col">Long URL</th>
-            <th scope="col">Edit</th>
-            <th scope="col">Delete</th>
             <th scope="col">Date Created</th>
             <th scope="col">Times Clicked</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -39,22 +39,22 @@
           <tr>
             <td><a href="/u/<%= url %>"><%= url %></td>
             <td><%= urls[url].longURL %></td>
-            <td>
-              <form method="POST" action="/urls/<%=url%>?_method=PUT">
-                <button type="submit" class="btn btn-outline-primary">
-                  Edit
-                </button>
-              </form>
-            </td>
-            <td>
-              <form method="POST" action="../urls/<%=url%>/delete?_method=DELETE">
-                <button type="submit" class="btn btn-outline-danger">
-                  Delete
-                </button>
-              </form>
-            </td>
             <td><%= urls[url].urlDate %></td>
             <td><%= urls[url].clicks %></td>
+            <td>
+                <form method="POST" action="/urls/<%=url%>?_method=PUT">
+                  <button type="submit" class="btn btn-outline-primary">
+                    Edit
+                  </button>
+                </form>
+              </td>
+              <td>
+                <form method="POST" action="../urls/<%=url%>/delete?_method=DELETE">
+                  <button type="submit" class="btn btn-outline-danger">
+                    Delete
+                  </button>
+                </form>
+              </td>
           </tr>
           <% } %>
         </tbody>
