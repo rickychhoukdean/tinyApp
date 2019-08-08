@@ -1,4 +1,8 @@
-const { userIDfromEmail } = require("./helpers");
+const {
+  userIDfromEmail,
+  generateRandomString,
+  urlsForUser
+} = require("./helpers");
 const express = require("express");
 const cookieSession = require("cookie-session");
 const app = express();
@@ -17,22 +21,6 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   })
 );
-
-//Random alphanumeric generator for urlDatabase and users
-let generateRandomString = function() {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  if (!urlDatabase[result] && !users[result]) {
-    return result;
-  } else {
-    generateRandomString(); //If the randomly generated string already exists then run again
-  }
-};
 
 const urlDatabase = {
   b6UTxQ: {
@@ -65,19 +53,6 @@ const users = {
   testID: { id: "test", email: "test@test.com", password: "test" }
 };
 
-//Get the urls for the specific user inputted
-const urlsForUser = function(id) {
-  let result = {};
-
-  for (let url in urlDatabase) {
-    if (id === urlDatabase[url].userID) {
-      result[url] = urlDatabase[url];
-    }
-  }
-  return result;
-};
-//Pulls the correct ID from an object of objects given an email and an object
-
 app.get("/", (req, res) => {
   let templateVars = {
     users: users,
@@ -106,7 +81,7 @@ app.get("/urls", (req, res) => {
   let templateVars = {
     users: users,
     user: req.session["user_id"],
-    urls: urlsForUser(req.session["user_id"])
+    urls: urlsForUser(req.session["user_id"], urlDatabase)
   };
 
   res.render("urls_index", templateVars);
@@ -116,7 +91,7 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
 
-  let shortURL = generateRandomString();
+  let shortURL = generateRandomString(urlDatabase);
 
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
@@ -162,22 +137,36 @@ app.post("/urls/:url/", (req, res) => {
 
 //Page after the user creates a short URL showing them the new shortURL and the edit button
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    users: users,
-    user: req.session["user_id"],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]["longURL"]
-  };
-  res.render("urls_show", templateVars);
+  if (!req.session["user_id"]) {
+    res.send("You must be logged in to edit a URL!");
+  } else if (!urlDatabase[req.params["shortURL"]]) {
+    res.send("Url requested does not exist!");
+  } else if (
+    urlDatabase[req.params["shortURL"]]["userID"] !== req.session["user_id"]
+  ) {
+    res.send("You cannot edit someone elses URL!");
+  } else {
+    let templateVars = {
+      users: users,
+      user: req.session["user_id"],
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]["longURL"]
+    };
+    res.render("urls_show", templateVars);
+  }
 });
 
 //Redirect link to the page of the URL that has been shortened
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]["longURL"];
+  if (!urlDatabase[req.params.shortURL]) {
+    res.send("Site DNE");
+  } else {
+    const longURL = urlDatabase[req.params.shortURL]["longURL"];
 
-  urlDatabase[req.params.shortURL]["clicks"] += 1;
+    urlDatabase[req.params.shortURL]["clicks"] += 1;
 
-  res.redirect(longURL);
+    res.redirect(longURL);
+  }
 });
 
 //Register Page
@@ -212,7 +201,7 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.send("None shall pass");
   } else {
-    let randomID = generateRandomString();
+    let randomID = generateRandomString(users);
     users[randomID] = {
       id: randomID,
       email: req.body.email,
@@ -226,7 +215,6 @@ app.post("/register", (req, res) => {
 //Login route
 app.post("/login", (req, res) => {
   let desiredID = userIDfromEmail(req.body["email"], users);
-  console.log(userIDfromEmail);
   if (!(userIDfromEmail(req.body["email"]), users)) {
     res.status(403).send("Error 403, email does not exist");
   } else if (
