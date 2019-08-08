@@ -30,6 +30,8 @@
             <th scope="col">Long URL</th>
             <th scope="col">Edit</th>
             <th scope="col">Delete</th>
+            <th scope="col">Date Created</th>
+            <th scope="col">Times Clicked</th>
           </tr>
         </thead>
         <tbody>
@@ -51,15 +53,13 @@
                 </button>
               </form>
             </td>
+            <td><%= urls[url].urlDate %></td>
+            <td></td>
           </tr>
           <% } %>
         </tbody>
       </table>
-      <% } else { %>
-Please log-in or register :)
-
-<% } %>
-
+      <% } else { %> Please log-in or register :) <% } %>
     </main>
 
     <!-- Bootstrap JS -->

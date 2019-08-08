@@ -35,10 +35,14 @@ let generateRandomString = function() {
 };
 
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
-  test1: { longURL: "https://www.googlea.ca", userID: "test" },
-  test2: { longURL: "https://www.googles.ca", userID: "test" }
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW", urlDate: "test" },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+    urlDate: "test"
+  },
+  test1: { longURL: "https://www.googlea.ca", userID: "test", urlDate: "test" },
+  test2: { longURL: "https://www.googles.ca", userID: "test", urlDate: "test" }
 };
 
 const users = {
@@ -100,7 +104,8 @@ app.post("/urls", (req, res) => {
 
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    userID: req.session["user_id"]
+    userID: req.session["user_id"],
+    urlDate: Date(Date.now()).toString()
   };
 
   res.redirect(`/urls/${shortURL}`);
@@ -127,6 +132,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
+//Post request to edit the URL
 app.post("/urls/:url/", (req, res) => {
   let shortURL = req.params.url;
   if (req.session["user_id"] === urlDatabase[req.params.url].userID) {
@@ -137,6 +143,7 @@ app.post("/urls/:url/", (req, res) => {
   }
 });
 
+//Page after the user creates a short URL showing them the new shortURL and the edit button
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     users: users,
@@ -147,6 +154,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//Redirect link to the page of the URL that has been shortened
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]["longURL"];
   res.redirect(longURL);
