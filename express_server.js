@@ -116,7 +116,9 @@ app.get("/urls.json", (req, res) => {
 });
 
 //Deletes the clicked URL if the correct user is logged in
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.use(methodOverride("_method"));
+app.delete("/urls/:shortURL/delete", (req, res) => {
+  console.log(req.params);
   if (req.session["user_id"] === urlDatabase[req.params.shortURL].userID) {
     delete urlDatabase[req.params.shortURL].userID;
     res.redirect(`/urls/`);
@@ -126,8 +128,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
+app.use(methodOverride("_method"));
 //Post request to edit the URL
-app.post("/urls/:url/", (req, res) => {
+app.put("/urls/:url/", (req, res) => {
   let shortURL = req.params.url;
   if (req.session["user_id"] === urlDatabase[req.params.url].userID) {
     res.redirect(`/urls/${shortURL}`);
