@@ -16,21 +16,19 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+      </div>
+    </div>
         <% if(!user){ %>
-
-        <form action="/register" method="GET">
-          <div class="username"><%=user%></div>
-          <button type="submit" class="btn btn-primary">Register</button>
-        </form>
-
-        <form action="/login" method="GET">
-          <div class="username"><%=user%></div>
-          <button type="submit" class="btn btn-primary">Login</button>
-        </form>
+        <div class="form-inline my-2 my-lg-0" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+         <strong> <a class="nav-item nav-link" href="/register">Register</a></strong>
+        <strong><a class="nav-item nav-link" href="/login">Login</a> <strong></strong>
+        </div>
+      </div>
         <% } else{ %>
         <form class="form-inline" action="/logout" method="POST">
-          <div class="username">You are logged in as <%=users[user].email%>!</div>
-          <button type="submit" class="btn btn-primary">Log Out</button>
+          <font color="white"> <div class="username">You are logged in as <%=user.email%>!</div> </font>
+          <button type="submit" class="btn btn-outline-light">Log Out</button>
         </form>
         <% }%>
       </div>

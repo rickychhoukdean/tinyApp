@@ -50,25 +50,27 @@ const urlDatabase = {
 };
 
 const users = {
-  testID: { id: "test", email: "test@test.com", password: "test" }
+  testID: {
+    id: "test",
+    email: "test@test.com",
+    password: bcrypt.hashSync("test", 10)
+  }
 };
 
 app.get("/", (req, res) => {
   let templateVars = {
-    users: users,
-    user: req.session["user_id"]
+    user: users[req.session["user_id"]]
   };
 
   if (templateVars.user) {
     res.render("urls_new", templateVars);
-  } else res.redirect("/register");
+  } else res.redirect("/login");
 });
 
 //Directs you to the create a new URL page, if not logged in direct you to the register page
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    users: users,
-    user: req.session["user_id"]
+    user: users[req.session["user_id"]]
   };
 
   if (templateVars.user) {
@@ -79,8 +81,7 @@ app.get("/urls/new", (req, res) => {
 //Shows you the URLs for your account only
 app.get("/urls", (req, res) => {
   let templateVars = {
-    users: users,
-    user: req.session["user_id"],
+    user: users[req.session["user_id"]],
     urls: urlsForUser(req.session["user_id"], urlDatabase)
   };
 
@@ -147,8 +148,7 @@ app.get("/urls/:shortURL", (req, res) => {
     res.send("You cannot edit someone elses URL!");
   } else {
     let templateVars = {
-      users: users,
-      user: req.session["user_id"],
+      user: users[req.session["user_id"]],
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL]["longURL"]
     };
@@ -172,8 +172,7 @@ app.get("/u/:shortURL", (req, res) => {
 //Register Page
 app.get("/register", (req, res) => {
   let templateVars = {
-    users: users,
-    user: req.session["user_id"]
+    user: users[req.session["user_id"]]
   };
   res.render("urls_register", templateVars);
 });
@@ -181,8 +180,7 @@ app.get("/register", (req, res) => {
 //Login Page
 app.get("/login", (req, res) => {
   let templateVars = {
-    users: users,
-    user: req.session["user_id"]
+    user: users[req.session["user_id"]]
   };
 
   res.render("urls_login", templateVars);
