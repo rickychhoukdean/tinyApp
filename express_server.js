@@ -60,6 +60,7 @@ const urlsForUser = function(id) {
 
 app.get("/", (req, res) => {
   let templateVars = {
+    users: users,
     user: req.session["user_id"]
   };
 
@@ -71,6 +72,7 @@ app.get("/", (req, res) => {
 //Directs you to the create a new URL page, if not logged in direct you to the register page
 app.get("/urls/new", (req, res) => {
   let templateVars = {
+    users: users,
     user: req.session["user_id"]
   };
 
@@ -82,6 +84,7 @@ app.get("/urls/new", (req, res) => {
 //Shows you the URLs for your account only
 app.get("/urls", (req, res) => {
   let templateVars = {
+    users: users,
     user: req.session["user_id"],
     urls: urlsForUser(req.session["user_id"])
   };
@@ -103,10 +106,10 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// app.post("/urls/:shortURL/Submit", (req, res) => {
-//   urlDatabase[req.params.shortURL] = req.body.newURL;
-//   res.redirect("/urls");
-// }); I think this is useless
+app.post("/urls/:shortURL/Submit", (req, res) => {
+  urlDatabase[req.params.shortURL]["longURL"] = req.body.newURL;
+  res.redirect("/urls");
+});
 
 //Returns the json file of the page
 app.get("/urls.json", (req, res) => {
@@ -126,8 +129,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:url/", (req, res) => {
   let shortURL = req.params.url;
-
-  if (req.session["user_id"] === urlDatabase[req.params.shortURL].userID) {
+  if (req.session["user_id"] === urlDatabase[req.params.url].userID) {
     res.redirect(`/urls/${shortURL}`);
   } else {
     console.log("fail");
@@ -137,6 +139,7 @@ app.post("/urls/:url/", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
+    users: users,
     user: req.session["user_id"],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]["longURL"]
@@ -152,6 +155,7 @@ app.get("/u/:shortURL", (req, res) => {
 //Register Page
 app.get("/register", (req, res) => {
   let templateVars = {
+    users: users,
     user: req.session["user_id"]
   };
   res.render("urls_register", templateVars);
@@ -160,6 +164,7 @@ app.get("/register", (req, res) => {
 //Login Page
 app.get("/login", (req, res) => {
   let templateVars = {
+    users: users,
     user: req.session["user_id"]
   };
 
